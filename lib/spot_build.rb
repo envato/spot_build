@@ -8,12 +8,13 @@ module SpotBuild
       sleep 5
     end
 
-    # Delay the inevitable
-    while SpotInstance.time_until_termination > 30
-      sleep 1
-    end
+    agent = BuildkiteAgent.new(options[:token], options[:org_slug])
+    agent.stop
 
-    BuildkiteAgent.new(options[:token], options[:org_slug]).the_end_is_nigh
+    # Delay the inevitable
+    sleep SpotInstance.time_until_termination - 30
+
+    agent.the_end_is_nigh
   end
 
   def self.parse_options

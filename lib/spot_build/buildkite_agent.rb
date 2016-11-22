@@ -10,8 +10,12 @@ module SpotBuild
 
     def the_end_is_nigh
       job = current_job
-      terminate_agent
+      stop(true)
       reschedule_job(job)
+    end
+
+    def stop(force="false")
+      @client.stop_agent(@org_slug, agent_id, "{\"force\": #{force}}")
     end
 
     private
@@ -19,10 +23,6 @@ module SpotBuild
     def reschedule_job(job)
       return if job.nil?
       @client.retry_job(@org_slug, job_pipeline(job[:build_url]), job_build(job[:build_url]), job[:id])
-    end
-
-    def terminate_agent
-      @client.stop_agent(@org_slug, agent_id, '{"force": true}')
     end
 
     # build_url: https://api.buildkite.com/v2/organizations/my-great-org/pipelines/sleeper/builds/50
