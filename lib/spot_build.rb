@@ -20,11 +20,17 @@ module SpotBuild
 
   def self.parse_options
     options = {}
-    OptionParser.new do |opts|
+    parser = OptionParser.new do |opts|
       opts.banner = "Usage: #{__FILE__} [options]"
-      opts.on("--token TOKEN", "Buildkite API token") { |v| options[:token] = v }
-      opts.on("--org-slug ORGANISATION-SLUG", "The Buildkite Organisation Slug") { |v| options[:org_slug] = v }
-    end.parse!
+      opts.on("-t", "--token TOKEN", "Buildkite API token") { |v| options[:token] = v }
+      opts.on("-o", "--org-slug ORGANISATION-SLUG", "The Buildkite Organisation Slug") { |v| options[:org_slug] = v }
+    end
+    parser.parse!
+
+    if options[:token].nil? || options[:org_slug].nil?
+      raise OptionParser::MissingArgument, "You must specify Token and Organisational Slug.\n#{parser.help}"
+    end
+
     options
   end
 end
