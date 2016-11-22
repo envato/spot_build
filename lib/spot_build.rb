@@ -1,5 +1,6 @@
 require 'spot_build/buildkite_agent'
 require 'spot_build/spot_instance'
+require 'optparse'
 
 module SpotBuild
   def self.run
