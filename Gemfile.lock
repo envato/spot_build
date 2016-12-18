@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    spot_build (0.0.1)
+      buildkit (~> 0.4)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -15,7 +21,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  buildkit
+  spot_build!
 
 BUNDLED WITH
    1.11.2
