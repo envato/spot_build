@@ -10,6 +10,7 @@ module SpotBuild
     end
 
     def the_end_is_nigh
+      return unless agent_running?
       job = current_job
       stop(true)
       reschedule_job(job)
@@ -45,7 +46,7 @@ module SpotBuild
     end
 
     def agent_id
-      @agent_id ||= agent.fetch(:id, nil)
+      @agent_id ||= agent[:id]
     end
 
     def agent
