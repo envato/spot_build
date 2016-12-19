@@ -12,7 +12,7 @@ module SpotBuild
 
     checks = [SpotInstance.new]
     if options[:queue_url]
-      checks.push(SqsEvent.new(options[:queue_url], options[:timeout]))
+      checks.push(SqsEvent.new(url: options[:queue_url], timeout: options[:timeout], region: options[:aws_region]))
     end
 
     checks.each do |check|
@@ -40,6 +40,7 @@ module SpotBuild
       opts.on("-o", "--org-slug ORGANISATION-SLUG", "The Buildkite Organisation Slug") { |v| options[:org_slug] = v }
       opts.on("-s", "--sqs-queue SQS-QUEUE-URL", "The SQS Queue URL we should monitor for events that tell us to shutdown") { |v| options[:queue_url] = v }
       opts.on("--timeout", "The amount of time to wait for the buildkite agent to stop before shutting down. Only used if --sqs-queue is specified") { |v| options[:timeout] = v }
+      opts.on("-r", "--aws-region REGION", "The AWS Region the SQS queue resides in")  { |v| options[:aws_region] = v }
     end
     parser.parse!
 

@@ -2,7 +2,7 @@ require 'net/http'
 require 'time'
 
 module SpotBuild
-  module SpotInstance
+  class SpotInstance
     def poll(&block)
       return unless self.class.scheduled_for_termination?
       yield
