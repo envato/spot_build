@@ -16,6 +16,7 @@ module SpotBuild
     end
 
     def stop(force="false")
+      return unless agent_running?
       @client.stop_agent(@org_slug, agent_id, "{\"force\": #{force}}")
     end
 
@@ -44,7 +45,7 @@ module SpotBuild
     end
 
     def agent_id
-      @agent_id ||= agent[:id]
+      @agent_id ||= agent.fetch(:id, nil)
     end
 
     def agent
