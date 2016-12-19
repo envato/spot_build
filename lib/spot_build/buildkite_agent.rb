@@ -18,6 +18,10 @@ module SpotBuild
       @client.stop_agent(@org_slug, agent_id, "{\"force\": #{force}}")
     end
 
+    def agent_running?
+      !agent.nil?
+    end
+
     private
 
     def reschedule_job(job)

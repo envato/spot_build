@@ -3,6 +3,11 @@ require 'time'
 
 module SpotBuild
   module SpotInstance
+    def poll(&block)
+      return unless self.class.scheduled_for_termination?
+      yield
+    end
+
     def self.scheduled_for_termination?
       !time_until_termination.nil?
     end
