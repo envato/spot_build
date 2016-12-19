@@ -15,18 +15,21 @@ module SpotBuild
       checks.push(SqsEvent.new(url: options[:queue_url], timeout: options[:timeout], region: options[:aws_region]))
     end
 
-    checks.each do |check|
-      check.poll do
-        timeout = SpotInstance.scheduled_for_termination? ? (SpotInstance.time_until_termination - 30) : options[:timeout]
-        agent = BuildkiteAgent.new(options[:token], options[:org_slug])
+    agent = BuildkiteAgent.new(options[:token], options[:org_slug])
+    loop do
+      checks.each do |check|
+        check.poll do
+          timeout = SpotInstance.scheduled_for_termination? ? (SpotInstance.time_until_termination - 30) : options[:timeout]
 
-        agent.stop
-        Timeout::timeout(timeout) do
-          while agent.agent_running?
-            sleep 5
+          agent.stop
+          Timeout::timeout(timeout) do
+            while agent.agent_running?
+              sleep 5
+            end
           end
+          agent.the_end_is_nigh
+          %x(shutdown -h now)
         end
-        agent.the_end_is_nigh
       end
       sleep 2
     end
