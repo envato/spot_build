@@ -1,5 +1,6 @@
 require 'buildkit'
 require 'socket'
+require 'link_header'
 
 module SpotBuild
   class BuildkiteAgent
@@ -51,7 +52,24 @@ module SpotBuild
     end
 
     def agents
-      @client.agents(@org_slug)
+      with_pagination do |options = {}|
+        @client.agents(@org_slug, options)
+      end
+    end
+
+    # This is definately not thread safe
+    def with_pagination(&block)
+      results = yield
+      while next_ref = next_link_ref(@client.last_response.headers["link"])
+        uri = URI.parse(next_ref.href)
+        next_page = uri.query.split("=")[1]
+        results.push(yield page: next_page)
+      end
+      results.flatten
+    end
+
+    def next_link_ref(header)
+      LinkHeader.parse(header).find_link(["rel", "next"])
     end
   end
 end

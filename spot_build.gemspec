@@ -17,4 +17,5 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'buildkit', '~> 0.4'
   gem.add_dependency 'aws-sdk', '~> 2'
+  gem.add_dependency 'link_header', '~> 0.0.2'
 end
