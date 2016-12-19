@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_dependency 'buildkit', '~> 0.4'
+  gem.add_dependency 'aws-sdk', '~> 2'
 end

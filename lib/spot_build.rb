@@ -1,5 +1,6 @@
 require 'spot_build/buildkite_agent'
 require 'spot_build/spot_instance'
+require 'spot_build/sqs_event'
 require 'optparse'
 
 module SpotBuild
