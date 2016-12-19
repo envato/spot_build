@@ -10,7 +10,7 @@ module SpotBuild
     options = parse_options
     options[:timeout] ||= DEFAULT_TIMEOUT
 
-    checks = [SpotInstance.new, queue]
+    checks = [SpotInstance.new]
     if options[:queue_url]
       checks.push(SqsEvent.new(options[:queue_url], options[:timeout]))
     end
