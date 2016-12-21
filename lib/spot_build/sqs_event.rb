@@ -8,16 +8,17 @@ module SpotBuild
       @timeout = timeout
     end
 
-    def poll(&block)
+    def shutdown_if_required(&block)
       # Any message to this queue is treated as a "I should shutdown"
       message = @queue.receive_messages(
         attribute_names: ["All"],
         max_number_of_messages: 1,
         visibility_timeout: (@timeout - 5),
       ).first
-      return if message.nil?
+      return false if message.nil?
       yield
       message.delete
+      true
     end
   end
 end

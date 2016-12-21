@@ -18,7 +18,7 @@ module SpotBuild
     agent = BuildkiteAgent.new(options[:token], options[:org_slug])
     loop do
       checks.each do |check|
-        check.poll do
+        terminating = check.shutdown_if_required do
           timeout = SpotInstance.scheduled_for_termination? ? (SpotInstance.time_until_termination - 30) : options[:timeout]
 
           agent.stop
@@ -28,8 +28,8 @@ module SpotBuild
             end
           end
           agent.the_end_is_nigh
-          %x(shutdown -h now)
         end
+        %x(shutdown -h now) if terminating
       end
       sleep 2
     end
