@@ -26,7 +26,7 @@ module SpotBuild
             while agent.agent_running?
               sleep 5
             end
-          end
+          end rescue Timeout::Error
           agent.the_end_is_nigh
         end
         %x(shutdown -h now) if terminating
