@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.name          = 'spot_build'
-  gem.version       = '0.0.3'
+  gem.version       = '0.0.4'
   gem.authors       = ['Patrick Robinson']
   gem.email         = []
   gem.description   = 'Helps manage Buildkite Agents running on EC2 Spot instances'
