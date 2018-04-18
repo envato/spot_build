@@ -42,11 +42,11 @@ module SpotBuild
     end
 
     def current_job
-      agent[:job]
+      agent.job
     end
 
     def agent_id
-      @agent_id ||= agent[:id]
+      @agent_id ||= agent.id
     end
 
     def agent
