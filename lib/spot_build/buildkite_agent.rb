@@ -19,6 +19,8 @@ module SpotBuild
     def stop(force="false")
       return unless agent_running?
       @client.stop_agent(@org_slug, agent_id, "{\"force\": #{force}}")
+    rescue Buildkit::UnprocessableEntity
+      # Swallow the error, this is generally thrown when the agent has already stopped
     end
 
     def agent_running?
