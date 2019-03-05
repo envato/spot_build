@@ -10,21 +10,17 @@ module SpotBuild
     end
 
     def the_end_is_nigh
-      return unless agent_running?
-      job = current_job
-      stop(true)
-      reschedule_job(job)
+      agents_on_this_host.each do |agent|
+        job = agent.job
+        stop_agent(agent, force: true)
+        reschedule_job(job)
+      end.count
     end
 
-    def stop(force="false")
-      return unless agent_running?
-      @client.stop_agent(@org_slug, agent_id, "{\"force\": #{force}}")
+    def stop_agent(agent, force: false)
+      @client.stop_agent(@org_slug, agent.id, "{\"force\": #{force}}")
     rescue Buildkit::UnprocessableEntity
       # Swallow the error, this is generally thrown when the agent has already stopped
-    end
-
-    def agent_running?
-      !agent.nil?
     end
 
     private
@@ -43,19 +39,11 @@ module SpotBuild
       build_url[%r{organizations/#{@org_slug}/pipelines/[^/]*/builds/([0-9]*)}, 1]
     end
 
-    def current_job
-      agent.job
+    def agents_on_this_host
+      all_agents.select { |agent| agent.hostname == Socket.gethostname }
     end
 
-    def agent_id
-      @agent_id ||= agent.id
-    end
-
-    def agent
-      agents.select { |agent| agent.hostname == Socket.gethostname }.first
-    end
-
-    def agents
+    def all_agents
       with_pagination do |options = {}|
         @client.agents(@org_slug, options)
       end
