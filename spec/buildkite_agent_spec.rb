@@ -3,7 +3,7 @@ require 'spec_helper'
 describe SpotBuild::BuildkiteAgent do
   let(:org_slug) { "envato" }
   let(:pipeline) { "my-app" }
-  subject { described_class.new('deadbeef', org_slug) }
+  subject(:buildkite_agent) { described_class.new('deadbeef', org_slug) }
   let(:last_response_stub) { instance_double(Sawyer::Response) }
   let(:buildkit_stub) { instance_double("Buildkit::Client", :agents => agent_stubs) }
   let(:hostname) { "i-1234567890" }
@@ -28,8 +28,10 @@ describe SpotBuild::BuildkiteAgent do
     context 'the agent is not running' do
       let(:agent_stubs) { [] }
 
-      it 'returns 0' do
-        expect(subject.the_end_is_nigh).to equal(0)
+      it 'does nothing' do
+        expect(buildkit_stub).to_not receive(:stop_agent)
+        expect(buildkit_stub).to_not receive(:retry_job)
+        buildkite_agent.the_end_is_nigh
       end
     end
 
@@ -47,13 +49,13 @@ describe SpotBuild::BuildkiteAgent do
       it 'stops each agent forcefully' do
         expect(buildkit_stub).to receive(:stop_agent).with(org_slug, agent_1_id, '{"force": true}')
         expect(buildkit_stub).to receive(:stop_agent).with(org_slug, agent_2_id, '{"force": true}')
-        subject.the_end_is_nigh
+        buildkite_agent.the_end_is_nigh
       end
 
       it 'reschedules the job' do
         expect(buildkit_stub).to receive(:retry_job).with(org_slug, pipeline, build_id, '1')
         expect(buildkit_stub).to receive(:retry_job).with(org_slug, pipeline, build_id, '2')
-        subject.the_end_is_nigh
+        buildkite_agent.the_end_is_nigh
       end
 
       context "when the jobs aren't retryable yet" do
@@ -68,7 +70,7 @@ describe SpotBuild::BuildkiteAgent do
             response = responses.shift
             response.call if response
           end
-          subject.the_end_is_nigh
+          buildkite_agent.the_end_is_nigh
           expect(buildkit_stub).to have_received(:retry_job)
             .with(org_slug, pipeline, build_id, '1')
             .twice
@@ -86,7 +88,7 @@ describe SpotBuild::BuildkiteAgent do
 
       it 'retries the job' do
         expect(buildkit_stub).to receive(:retry_job)
-        subject.the_end_is_nigh
+        buildkite_agent.the_end_is_nigh
       end
     end
   end
