@@ -6,7 +6,7 @@ describe SpotBuild::BuildkiteAgent do
   subject { described_class.new('deadbeef', org_slug) }
   
   let(:last_response_stub) { instance_double(Sawyer::Response) }
-  let(:buildkit_stub) { double("Buildkit", :agents => agent_stubs) }
+  let(:buildkit_stub) { instance_double("Buildkit::Client", :agents => agent_stubs) }
   let(:hostname) { "i-1234567890" }
   let(:build_id) { "12345678" }
 
