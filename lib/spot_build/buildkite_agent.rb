@@ -9,12 +9,14 @@ module SpotBuild
       @org_slug = org_slug
     end
 
-    def the_end_is_nigh
-      agents_on_this_host.each do |agent|
-        job = agent.job
+    def the_end_is_nigh(host = Socket.gethostname)
+      agents = agents_on_this_host(host)
+      agents.each do |agent|
         stop_agent(agent, force: true)
-        reschedule_job(job)
-      end.count
+      end
+      agents.each do |agent|
+        reschedule_job(agent.job)
+      end
     end
 
     def stop_agent(agent, force: false)
@@ -25,9 +27,27 @@ module SpotBuild
 
     private
 
+    RETRY_MESSAGE = /Only failed or timed out jobs can be retried/.freeze
+
     def reschedule_job(job)
       return if job.nil?
-      @client.retry_job(@org_slug, job_pipeline(job[:build_url]), job_build(job[:build_url]), job[:id])
+      retry_error(Buildkit::BadRequest, RETRY_MESSAGE) do
+        @client.retry_job(@org_slug, job_pipeline(job[:build_url]), job_build(job[:build_url]), job[:id])
+      end
+    end
+
+    def retry_error(error_class, message_regex, sleep: 2, retries: 20)
+      begin
+        yield
+      rescue error_class => e
+        if retries > 0 && e.message =~ message_regex
+          sleep 0.5
+          retries -= 1
+          retry
+        else
+          raise
+        end
+      end
     end
 
     # build_url: https://api.buildkite.com/v2/organizations/my-great-org/pipelines/sleeper/builds/50
@@ -39,8 +59,8 @@ module SpotBuild
       build_url[%r{organizations/#{@org_slug}/pipelines/[^/]*/builds/([0-9]*)}, 1]
     end
 
-    def agents_on_this_host
-      all_agents.select { |agent| agent.hostname == Socket.gethostname }
+    def agents_on_this_host(host)
+      all_agents.select { |agent| agent.hostname == host }
     end
 
     def all_agents

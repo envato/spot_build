@@ -4,13 +4,12 @@ describe SpotBuild::BuildkiteAgent do
   let(:org_slug) { "envato" }
   let(:pipeline) { "my-app" }
   subject { described_class.new('deadbeef', org_slug) }
-  
   let(:last_response_stub) { instance_double(Sawyer::Response) }
   let(:buildkit_stub) { instance_double("Buildkit::Client", :agents => agent_stubs) }
   let(:hostname) { "i-1234567890" }
   let(:build_id) { "12345678" }
 
-  def agent(id:, build_id: build_id, job_id: "1")
+  def agent(id:, build_id: "12345678", job_id: "1")
     double("BuildkiteAgent#{id}",
       hostname: hostname,
       id: id,
@@ -55,6 +54,25 @@ describe SpotBuild::BuildkiteAgent do
         expect(buildkit_stub).to receive(:retry_job).with(org_slug, pipeline, build_id, '1')
         expect(buildkit_stub).to receive(:retry_job).with(org_slug, pipeline, build_id, '2')
         subject.the_end_is_nigh
+      end
+
+      context "when the jobs aren't retryable yet" do
+        let(:agent_stubs) { [agent(id: agent_1_id, build_id: build_id, job_id: '1')] }
+
+        it 'retries' do
+          responses = [
+            -> { raise Buildkit::BadRequest, {method: 'PUT', url: 'https://api.buildkite.com/v2/organizations/#{org_slug}/pipelines/#{pipeline}/builds/18961/jobs/1/retry', body: 'Only failed or timed out jobs can be retried'} },
+            -> { nil }
+          ]
+          allow(buildkit_stub).to receive(:retry_job).with(org_slug, pipeline, build_id, '1') do
+            response = responses.shift
+            response.call if response
+          end
+          subject.the_end_is_nigh
+          expect(buildkit_stub).to have_received(:retry_job)
+            .with(org_slug, pipeline, build_id, '1')
+            .twice
+        end
       end
     end
 
