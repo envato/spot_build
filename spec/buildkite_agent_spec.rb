@@ -28,7 +28,7 @@ describe SpotBuild::BuildkiteAgent do
     context 'the agent is not running' do
       let(:agent_stubs) { [] }
 
-      it 'returns nil' do
+      it 'returns 0' do
         expect(subject.the_end_is_nigh).to equal(0)
       end
     end

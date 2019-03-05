@@ -17,6 +17,7 @@ module SpotBuild
       agents.each do |agent|
         reschedule_job(agent.job)
       end
+      agents.count
     end
 
     def stop_agent(agent, force: false)
