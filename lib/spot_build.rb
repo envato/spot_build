@@ -1,4 +1,4 @@
-require 'spot_build/buildkite_agent'
+require 'spot_build/buildkite_agents'
 require 'spot_build/spot_instance'
 require 'spot_build/sqs_event'
 require 'optparse'
@@ -15,19 +15,19 @@ module SpotBuild
       checks.push(SqsEvent.new(url: options[:queue_url], timeout: options[:timeout], region: options[:aws_region]))
     end
 
-    agent = BuildkiteAgent.new(options[:token], options[:org_slug])
+    agents = BuildkiteAgents.new(options[:token], options[:org_slug])
     loop do
       checks.each do |check|
         terminating = check.shutdown_if_required do
           timeout = SpotInstance.scheduled_for_termination? ? (SpotInstance.time_until_termination - 30) : options[:timeout]
 
-          agent.stop
+          agents.stop
           Timeout::timeout(timeout) do
-            while agent.agents_running?
+            while agents.agents_running?
               sleep 5
             end
           end rescue Timeout::Error
-          agent.the_end_is_nigh
+          agents.the_end_is_nigh
         end
         %x(shutdown -h now) if terminating
       end

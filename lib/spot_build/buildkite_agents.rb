@@ -32,7 +32,7 @@ module SpotBuild
 
     def stop(host = Socket.gethostname)
       agents_on_this_host(host).each do |agent|
-        stop_agent(agent.id, force: false)
+        stop_agent(agent, force: false)
       end
     end
 

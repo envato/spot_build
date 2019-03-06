@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe SpotBuild::BuildkiteAgent do
+describe SpotBuild::BuildkiteAgents do
   let(:org_slug) { "envato" }
   let(:pipeline) { "my-app" }
   subject(:buildkite_agent) { described_class.new('deadbeef', org_slug) }
