@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
-  gem.add_dependency 'buildkit', '~> 0.4'
+  gem.add_dependency 'buildkit', '~> 1.4'
   gem.add_dependency 'aws-sdk', '~> 2'
   gem.add_dependency 'link_header', '~> 0.0.2'
   gem.add_development_dependency 'rspec',  '~> 3'
