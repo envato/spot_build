@@ -23,7 +23,7 @@ module SpotBuild
 
           agent.stop
           Timeout::timeout(timeout) do
-            while agent.agent_running?
+            while agent.agents_running?
               sleep 5
             end
           end rescue Timeout::Error

@@ -24,6 +24,24 @@ describe SpotBuild::BuildkiteAgent do
     allow(last_response_stub).to receive(:headers).and_return({"link" => nil})
   end
 
+  describe '#agents_running' do
+    context 'when agents are running' do
+      let(:agent_stubs) { [agent(id: '123', build_id: build_id, job_id: '1')] }
+
+      it 'returns true' do
+        expect(buildkite_agent.agents_running?).to eq true
+      end
+    end
+
+    context "when agents aren't running" do
+      let(:agent_stubs) { [] }
+
+      it 'returns false' do
+        expect(buildkite_agent.agents_running?).to eq false
+      end
+    end
+  end
+
   describe '#the_end_is_nigh' do
     context 'the agent is not running' do
       let(:agent_stubs) { [] }

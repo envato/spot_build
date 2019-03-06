@@ -3,7 +3,7 @@ require 'socket'
 require 'link_header'
 
 module SpotBuild
-  class BuildkiteAgent
+  class BuildkiteAgents
     def initialize(token, org_slug)
       @client = Buildkit.new(token: token)
       @org_slug = org_slug
@@ -24,6 +24,16 @@ module SpotBuild
       @client.stop_agent(@org_slug, agent.id, "{\"force\": #{force}}")
     rescue Buildkit::UnprocessableEntity
       # Swallow the error, this is generally thrown when the agent has already stopped
+    end
+
+    def agents_running?(host = Socket.gethostname)
+      !agents_on_this_host(host).empty?
+    end
+
+    def stop(host = Socket.gethostname)
+      agents_on_this_host(host).each do |agent|
+        stop_agent(agent.id, force: false)
+      end
     end
 
     private
