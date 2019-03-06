@@ -19,15 +19,21 @@ module SpotBuild
     loop do
       checks.each do |check|
         terminating = check.shutdown_if_required do
-          timeout = SpotInstance.scheduled_for_termination? ? (SpotInstance.time_until_termination - 30) : options[:timeout]
-
           agents.stop
-          Timeout::timeout(timeout) do
+          if options[:auto_retries]
+            timeout = SpotInstance.scheduled_for_termination? ? (SpotInstance.time_until_termination - 30) : options[:timeout]
+
+            Timeout::timeout(timeout) do
+              while agents.agents_running?
+                sleep 5
+              end
+            end rescue Timeout::Error
+            agents.the_end_is_nigh
+          else
             while agents.agents_running?
               sleep 5
             end
-          end rescue Timeout::Error
-          agents.the_end_is_nigh
+          end
         end
         %x(shutdown -h now) if terminating
       end
@@ -36,7 +42,7 @@ module SpotBuild
   end
 
   def self.parse_options
-    options = {}
+    options = {auto_retries: true}
     parser = OptionParser.new do |opts|
       opts.banner = "Usage: #{__FILE__} [options]"
       opts.on("-t", "--token TOKEN", "Buildkite API token") { |v| options[:token] = v }
@@ -44,6 +50,7 @@ module SpotBuild
       opts.on("-s", "--sqs-queue SQS-QUEUE-URL", "The SQS Queue URL we should monitor for events that tell us to shutdown") { |v| options[:queue_url] = v }
       opts.on("--timeout TIMEOUT", "The amount of time to wait for the buildkite agent to stop before shutting down. Only used if --sqs-queue is specified") { |v| options[:timeout] = v.to_i }
       opts.on("-r", "--aws-region REGION", "The AWS Region the SQS queue resides in")  { |v| options[:aws_region] = v }
+      opts.on("-n", "--[no-]auto-retry", "Disable automatic retries") { |v| options[:auto_retries] = v }
     end
     parser.parse!
 
