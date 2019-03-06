@@ -37,12 +37,12 @@ module SpotBuild
       end
     end
 
-    def retry_error(error_class, message_regex, sleep: 2, retries: 20)
+    def retry_error(error_class, message_regex, sleep_seconds: 1, retries: 20)
       begin
         yield
       rescue error_class => e
         if retries > 0 && e.message =~ message_regex
-          sleep 0.5
+          sleep sleep_seconds
           retries -= 1
           retry
         else
