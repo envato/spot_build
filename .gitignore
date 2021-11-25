@@ -1,1 +1,9 @@
+*.gem
+.bundle/
+.config
+.ruby-version
+coverage/
 Gemfile.lock
+pkg/
+spec/reports/
+spec/examples.txt
