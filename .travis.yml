@@ -1,8 +1,0 @@
-language: ruby
-# Fixes issues with ruby 2.5 https://github.com/travis-ci/travis-ci/issues/8978
-before_install:
-  - gem install bundler
-rvm:
-  - 2.3
-  - 2.4
-  - 2.5
